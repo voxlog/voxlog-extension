@@ -1,5 +1,15 @@
-function sayHi(){
-  Spicetify.showNotification("Hello, world!");
+function showVoxLogMenu(){
+  // @ts-ignore
+  document.getElementById("voxBackdrop").style.display = "block";
+  // @ts-ignore
+  document.getElementById("voxMenu").style.display = "block";
+}
+
+function hideVoxLogMenu(){
+  // @ts-ignore
+  document.getElementById("voxBackdrop").style.display = "none";
+  // @ts-ignore
+  document.getElementById("voxMenu").style.display = "none";
 }
 
 async function main() {
@@ -12,10 +22,10 @@ async function main() {
   voxMenu.innerHTML = `
     <h2>voxlog</h2>
   `;
+  voxMenu.style.display = "none";
 
   // A black backdrop
   let voxBackdrop = document.createElement("div");
-  voxBackdrop.style.display = "block";
   voxBackdrop.style.position = "fixed";
   voxBackdrop.style.top = "0";
   voxBackdrop.style.left = "0";
@@ -23,8 +33,9 @@ async function main() {
   voxBackdrop.style.height = "100%";
   voxBackdrop.style.background = "rgba(0, 0, 0, 0.5)";
   voxBackdrop.style.zIndex = "9998";
+  voxBackdrop.id = "voxBackdrop";
+  voxBackdrop.style.display = "none";
 
-  voxMenu.style.display = "block";
   voxMenu.style.position = "absolute";
   voxMenu.style.top = "50%";
   voxMenu.style.left = "50%";
@@ -36,6 +47,7 @@ async function main() {
   voxMenu.style.zIndex = "9999";
   voxMenu.style.padding = "20px";
   voxMenu.style.color = "#fff";
+  voxMenu.id = "voxMenu";
 
   // voxlog instance url input
   let voxUrlInput = document.createElement("input");
@@ -82,21 +94,6 @@ async function main() {
   // Cursor pointer
   voxSaveBtn.style.cursor = "pointer";
 
-
-  /*
-      width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    cursor: pointer;
-    text-align: center;
-    background: red;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    */
   // Close button
   let voxCloseBtn = document.createElement("div");
   voxCloseBtn.innerHTML = `
@@ -131,8 +128,13 @@ async function main() {
   document.body.appendChild(voxBackdrop);
   document.body.appendChild(voxMenu);
 
-  let voxBtn = new Spicetify.Menu.Item("voxlog", false, () => sayHi());
+  let voxBtn = new Spicetify.Menu.Item("voxlog", false, () => showVoxLogMenu());
   voxBtn.register();
+
+  // Button to close (event)
+  voxCloseBtn.onclick = () => {
+    hideVoxLogMenu();
+  };
 }
 
 export default main;
