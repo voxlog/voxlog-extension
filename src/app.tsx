@@ -14,6 +14,9 @@ function showVoxLogMenu(){
 }
 
 function hideVoxLogMenu(){
+  // Hide error message
+  // @ts-ignore
+  document.querySelector(".voxErrorMsg").style.display = "none";
   // @ts-ignore
   document.getElementById("voxBackdrop").style.display = "none";
   // @ts-ignore
