@@ -12,11 +12,15 @@ function hideVoxLogMenu(){
   document.getElementById("voxMenu").style.display = "none";
 }
 
-async function main() {
-  while (!Spicetify?.showNotification) {
-    await new Promise(resolve => setTimeout(resolve, 100));
-  }
+function saveVoxLogSettings(){
+  // @ts-ignore
+  let voxUrl = document.querySelector(".voxUrlInput").value;
+  // @ts-ignore
+  let voxToken = document.querySelector(".voxTokenInput").value;
+  console.log(voxUrl, voxToken)
+}
 
+function main() {
   // Create voxlog's popup menu
   let voxMenu = document.createElement("div");
   voxMenu.innerHTML = `
@@ -60,6 +64,7 @@ async function main() {
   voxUrlInput.placeholder = "Instance URL here";
   voxUrlInput.style.marginBottom = "10px";
   voxUrlInput.style.marginTop = "10px";
+  voxUrlInput.className = "voxUrlInput";
 
   // The token input
   let voxTokenInput = document.createElement("input");
@@ -70,6 +75,7 @@ async function main() {
   voxTokenInput.style.border = "none";
   voxTokenInput.style.height = "40px";
   voxTokenInput.placeholder = "Your token here";
+  voxTokenInput.className = "voxTokenInput";
 
   // Save button
   let voxSaveBtn = document.createElement("button");
@@ -134,6 +140,11 @@ async function main() {
   // Button to close (event)
   voxCloseBtn.onclick = () => {
     hideVoxLogMenu();
+  };
+
+  // Button to save (event)
+  voxSaveBtn.onclick = () => {
+    saveVoxLogSettings();
   };
 }
 
