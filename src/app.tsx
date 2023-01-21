@@ -1,4 +1,12 @@
 function showVoxLogMenu(){
+  // Get the url and token from local storage
+  let voxUrl = Spicetify.LocalStorage.get("voxUrl");
+  let voxToken = Spicetify.LocalStorage.get("voxToken");
+  // Set the url and token in the input fields
+  // @ts-ignore
+  document.querySelector(".voxUrlInput").value = voxUrl;
+  // @ts-ignore
+  document.querySelector(".voxTokenInput").value = voxToken;
   // @ts-ignore
   document.getElementById("voxBackdrop").style.display = "block";
   // @ts-ignore
@@ -17,10 +25,46 @@ function saveVoxLogSettings(){
   let voxUrl = document.querySelector(".voxUrlInput").value;
   // @ts-ignore
   let voxToken = document.querySelector(".voxTokenInput").value;
-  console.log(voxUrl, voxToken)
+  // @ts-ignore
+  let voxErrorMsg = document.querySelector(".voxErrorMsg");
+  
+  // If the url or token is empty
+  if(voxUrl == "" || voxToken == ""){
+    // @ts-ignore
+    voxErrorMsg.innerHTML = ("Please fill all the fields");
+    // @ts-ignore
+    voxErrorMsg.style.display = "block";
+    return;
+  }
+
+  // If the url is not a valid url
+  // Check with regex
+  if(!voxUrl.match(/^(http|https):\/\/[a-zA-Z0-9-\.]+\.[a-z]{2,4}/)){
+    // @ts-ignore
+    voxErrorMsg.innerHTML = ("Please enter a valid url");
+    // @ts-ignore
+    voxErrorMsg.style.display = "block";
+    return;
+  }
+
+  // @ts-ignore
+  voxErrorMsg.style.display = "none";
+
+  // If the url is valid
+  // Save the url and token
+  Spicetify.LocalStorage.set("voxUrl", voxUrl);
+  Spicetify.LocalStorage.set("voxToken", voxToken);
+
+  // Hide the menu
+  hideVoxLogMenu();
 }
 
 function main() {
+  // Check local storage for voxlog settings
+  let voxUrl = Spicetify.LocalStorage.get("voxUrl");
+  let voxToken = Spicetify.LocalStorage.get("voxToken");
+  console.log("VOX DATA", voxUrl, voxToken);
+
   // Create voxlog's popup menu
   let voxMenu = document.createElement("div");
   voxMenu.innerHTML = `
@@ -36,7 +80,7 @@ function main() {
   voxBackdrop.style.width = "100%";
   voxBackdrop.style.height = "100%";
   voxBackdrop.style.background = "rgba(0, 0, 0, 0.5)";
-  voxBackdrop.style.zIndex = "9998";
+  voxBackdrop.style.zIndex = "1";
   voxBackdrop.id = "voxBackdrop";
   voxBackdrop.style.display = "none";
 
@@ -48,7 +92,7 @@ function main() {
   voxMenu.style.background = "#121212";
   voxMenu.style.borderRadius = "10px";
   voxMenu.style.boxShadow = "0 0 10px 0 rgba(0, 0, 0, 0.5)";
-  voxMenu.style.zIndex = "9999";
+  voxMenu.style.zIndex = "2";
   voxMenu.style.padding = "20px";
   voxMenu.style.color = "#fff";
   voxMenu.id = "voxMenu";
@@ -125,10 +169,18 @@ function main() {
     voxCloseBtn.style.background = "transparent";
   };
 
+  // Error message
+  let voxErrorMsg = document.createElement("div");
+  voxErrorMsg.className = "voxErrorMsg";
+  voxErrorMsg.style.color = "#ff0000";
+  voxErrorMsg.style.marginTop = "10px";
+  voxErrorMsg.style.display = "none";
+
   voxMenu.appendChild(voxUrlInput);
   voxMenu.appendChild(voxTokenInput);
   voxMenu.appendChild(voxSaveBtn);
   voxMenu.appendChild(voxCloseBtn);
+  voxMenu.appendChild(voxErrorMsg);
 
   // Add it to the UI
   document.body.appendChild(voxBackdrop);
