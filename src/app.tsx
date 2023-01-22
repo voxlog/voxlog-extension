@@ -110,7 +110,11 @@ async function scrobble(track: any) {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${voxlogToken}`
   };
-  await Spicetify.CosmosAsync.post(url, sendBody, headers);
+  try {
+    await Spicetify.CosmosAsync.post(url, sendBody, headers);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 // On song change
