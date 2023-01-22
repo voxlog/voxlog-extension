@@ -3,6 +3,13 @@ import {
   createVoxSaveBtn, createVoxErrorMsg, createVoxCloseBtn
 } from "./uiBuilder";
 
+let lastTimestamp = -1;
+// @ts-ignore
+let lastSong = null;
+//const MAX_DIFF = 10000;
+// DEBUG: to cheat, set max diff to a really high number
+const MAX_DIFF = 100000000;
+
 // Front-end functions
 function createFrontend() {
     // Create voxlog's popup menu
@@ -100,8 +107,74 @@ function saveVoxLogSettings(){
   hideVoxLogMenu();
 }
 
-function main() {
+// On song change
+// This is used to detect a song ending if it's not the last song in the queue
+function onSongChange(event: Event | undefined) {
+  if(!event) return;
+
+  //@ts-ignore
+  if(lastSong == null) return;
+
+  //@ts-ignore
+  const data = event.data;
+
+  const elapsedMs = (data.timestamp - lastTimestamp);
+  //@ts-ignore
+  const duration = Number(lastSong.metadata.duration);
+  const diff = duration - elapsedMs;
+  if(lastTimestamp != data.timestamp && diff > 0 && diff < MAX_DIFF) {
+    // New song began, scrobble the last one
+    //@ts-ignore
+    console.log('scrobble songchange', lastSong.metadata.title)
+    lastTimestamp = data.timestamp;
+    lastSong = data.track;
+  }
+}
+
+// On play/pause
+// This is used to detect a song ending if it's the last song in the queue
+// TODO: fix pause click
+function onPlayPause(event: Event | undefined) {
+  if(!event) return;
+
+  //@ts-ignore
+  const data = event.data;
+
+  // Playback just started
+  //@ts-ignore
+  if(lastSong == null) {
+    lastSong = data.track;
+    lastTimestamp = data.timestamp;
+  }
+
+  const elapsedMs = (data.timestamp - lastTimestamp);
+  //@ts-ignore
+  const duration = Number(lastSong.metadata.duration);
+  const diff = duration - elapsedMs;
+
+  // Playback just stopped, scrobble the last song
+  // It's better to use last song instead of current song because sometimes the current song
+  // can be empty when the playback stops
+  if(lastTimestamp != data.timestamp && data.playback_speed == 0 && data.is_buffering == true) {
+    lastTimestamp = data.timestamp;
+    //@ts-ignore
+    console.log('scrobble playpause', lastSong.metadata.title)
+  }
+}
+
+async function main() {
+  // Give some time for the module to load
+  while (!Spicetify.CosmosAsync) {
+    await new Promise((r) => setTimeout(r, 100));
+  }
+
   createFrontend();
+
+  // Listen for song change
+  Spicetify.Player.addEventListener("songchange", onSongChange);
+
+  // Listen for play/pause
+  Spicetify.Player.addEventListener("onplaypause", onPlayPause);
 }
 
 export default main;
