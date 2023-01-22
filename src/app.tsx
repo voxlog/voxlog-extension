@@ -129,7 +129,6 @@ function onSongChange(event: Event | undefined) {
     lastTimestamp = data.timestamp;
     lastSong = data.track;
   }
-  //console.log(lastSong.metadata.title)
 }
 
 // On play/pause
@@ -156,10 +155,6 @@ function onPlayPause(event: Event | undefined) {
     console.log('scrobble playpause', lastSong.metadata.title)
     lastSong = null;
   }
-}
-
-function test(data: any) {
-  console.log(data)
 }
 
 async function main() {
