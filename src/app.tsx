@@ -85,16 +85,6 @@ function saveVoxLogSettings(){
     return;
   }
 
-  // If the url is not a valid url
-  // Check with regex
-  if(!voxUrl.match(/^(http|https):\/\/[a-zA-Z0-9-\.]+\.[a-z]{2,4}/)){
-    // @ts-ignore
-    voxErrorMsg.innerHTML = ("Please enter a valid url");
-    // @ts-ignore
-    voxErrorMsg.style.display = "block";
-    return;
-  }
-
   // @ts-ignore
   voxErrorMsg.style.display = "none";
 
@@ -107,9 +97,25 @@ function saveVoxLogSettings(){
   hideVoxLogMenu();
 }
 
+// Scrobble function
+async function scrobble(track: any) {
+  const trackId = track.uri.split(":")[2];
+  const voxlogInstanceUrl = Spicetify.LocalStorage.get("voxUrl");
+  const voxlogToken = Spicetify.LocalStorage.get("voxToken");
+  const url = `${voxlogInstanceUrl}/scrobbles`;
+  const sendBody = {
+    "spIdTrack": trackId
+  };
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${voxlogToken}`
+  };
+  await Spicetify.CosmosAsync.post(url, sendBody, headers);
+}
+
 // On song change
 // This is used to detect a song ending if it's not the last song in the queue
-function onSongChange(event: Event | undefined) {
+async function onSongChange(event: Event | undefined) {
   if(!event) return;
 
   //@ts-ignore
@@ -125,7 +131,7 @@ function onSongChange(event: Event | undefined) {
   if(lastTimestamp != data.timestamp && diff > 0 && diff < MAX_DIFF && data.is_buffering == false) {
     // New song began, scrobble the last one
     //@ts-ignore
-    console.log('scrobble songchange', lastSong.metadata.title)
+    await scrobble(lastSong);
     lastTimestamp = data.timestamp;
     lastSong = data.track;
   }
@@ -133,7 +139,7 @@ function onSongChange(event: Event | undefined) {
 
 // On play/pause
 // This is used to detect a song ending if it's the last song in the queue
-function onPlayPause(event: Event | undefined) {
+async function onPlayPause(event: Event | undefined) {
   if(!event) return;
 
   //@ts-ignore
@@ -142,7 +148,6 @@ function onPlayPause(event: Event | undefined) {
   // Playback just started
   //@ts-ignore
   if(lastSong == null) {
-    console.log
     lastSong = data.track;
     lastTimestamp = data.timestamp;
   }
@@ -152,7 +157,7 @@ function onPlayPause(event: Event | undefined) {
   else if(lastTimestamp != data.timestamp && data.playback_speed == 0 && data.is_buffering == true) {
     lastTimestamp = data.timestamp;
     //@ts-ignore
-    console.log('scrobble playpause', lastSong.metadata.title)
+    await scrobble(lastSong);
     lastSong = null;
   }
 }
