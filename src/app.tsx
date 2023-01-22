@@ -122,18 +122,18 @@ function onSongChange(event: Event | undefined) {
   //@ts-ignore
   const duration = Number(lastSong.metadata.duration);
   const diff = duration - elapsedMs;
-  if(lastTimestamp != data.timestamp && diff > 0 && diff < MAX_DIFF) {
+  if(lastTimestamp != data.timestamp && diff > 0 && diff < MAX_DIFF && data.is_buffering == false) {
     // New song began, scrobble the last one
     //@ts-ignore
     console.log('scrobble songchange', lastSong.metadata.title)
     lastTimestamp = data.timestamp;
     lastSong = data.track;
   }
+  //console.log(lastSong.metadata.title)
 }
 
 // On play/pause
 // This is used to detect a song ending if it's the last song in the queue
-// TODO: fix pause click
 function onPlayPause(event: Event | undefined) {
   if(!event) return;
 
@@ -143,23 +143,23 @@ function onPlayPause(event: Event | undefined) {
   // Playback just started
   //@ts-ignore
   if(lastSong == null) {
+    console.log
     lastSong = data.track;
     lastTimestamp = data.timestamp;
   }
-
-  const elapsedMs = (data.timestamp - lastTimestamp);
-  //@ts-ignore
-  const duration = Number(lastSong.metadata.duration);
-  const diff = duration - elapsedMs;
-
   // Playback just stopped, scrobble the last song
   // It's better to use last song instead of current song because sometimes the current song
   // can be empty when the playback stops
-  if(lastTimestamp != data.timestamp && data.playback_speed == 0 && data.is_buffering == true) {
+  else if(lastTimestamp != data.timestamp && data.playback_speed == 0 && data.is_buffering == true) {
     lastTimestamp = data.timestamp;
     //@ts-ignore
     console.log('scrobble playpause', lastSong.metadata.title)
+    lastSong = null;
   }
+}
+
+function test(data: any) {
+  console.log(data)
 }
 
 async function main() {
